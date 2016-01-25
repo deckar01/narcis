@@ -43,19 +43,26 @@ class Device(VersionModel):
     text = super(Device, self).__str__()
 
     if(not self.version):
-      text += ' (' + str(self.screen_width) + ' x ' + str(self.screen_height) + ')'
+      text += ' ({0} x {1})'.format(str(self.screen_width), str(self.screen_height))
     
     return text
 
 class TargetPlatform(BaseModel):
+  device = models.ForeignKey(Device)
   operating_system = models.ForeignKey(OperatingSystem)
   browser = models.ForeignKey(Browser)
-  device = models.ForeignKey(Device)
+
+  def __str__(self):
+    text = super(TargetPlatform, self).__str__()
+    return '{0} {1} {2} {3}'.format(text, self.device, self.operating_system, self.browser)
 
 class Project(VersionModel):
   url = models.CharField(max_length=2083, null=True, blank=True)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
   target_platforms = models.ManyToManyField(TargetPlatform)
+
+  class Meta:
+    unique_together = (('name', 'user'),)
 
 class Page(BaseModel):
   path = models.CharField(max_length=2083, null=True, blank=True)
@@ -63,3 +70,6 @@ class Page(BaseModel):
 
   def url(self):
     return self.project.url + self.path
+
+  class Meta:
+    unique_together = (('name', 'project'),)
