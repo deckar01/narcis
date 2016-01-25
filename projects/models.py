@@ -1,8 +1,11 @@
 from __future__ import unicode_literals
 from datetime import datetime
+import uuid
+import os
 
 from django.db import models
 from django.contrib.auth.models import User
+from private_media.storages import PrivateMediaStorage
 
 class BaseModel(models.Model):
   name = models.CharField(max_length=200)
@@ -73,3 +76,22 @@ class Page(BaseModel):
 
   class Meta:
     unique_together = (('name', 'project'),)
+
+def screenshot_upload_to(self, filename):
+  return 'projects/{0}/{1}/{2}/{3}{4}'.format(
+    self.page.project.id,
+    self.target_platform.id,
+    self.page.id,
+    self.id,
+    self.extension()
+  )
+
+class Screenshot(BaseModel):
+  id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+  image = models.ImageField(storage=PrivateMediaStorage(), upload_to=screenshot_upload_to)
+  page = models.ForeignKey(Page, on_delete=models.CASCADE)
+  target_platform = models.ForeignKey(TargetPlatform, on_delete=models.CASCADE)
+
+  def extension(self):
+    name, extension = os.path.splitext(self.image.name)
+    return extension

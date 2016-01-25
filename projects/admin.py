@@ -14,4 +14,5 @@ admin.site.register(Device)
 admin.site.register(OperatingSystem)
 admin.site.register(TargetPlatform)
 admin.site.register(Page, PageAdmin)
+admin.site.register(Screenshot)
 
