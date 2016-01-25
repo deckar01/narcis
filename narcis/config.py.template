@@ -22,3 +22,16 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+# User uploaded files
+if DEBUG:
+    # dev
+    import os
+    PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
+    PRIVATE_MEDIA_ROOT = os.path.join(PROJECT_PATH, 'private')
+    PRIVATE_MEDIA_SERVER = 'private_media.servers.DefaultServer'
+else:
+    # prod
+    PRIVATE_MEDIA_ROOT = '/home/user/my/path/to/private/media'
+    PRIVATE_MEDIA_SERVER = 'private_media.servers.ApacheXSendfileServer'
+    #PRIVATE_MEDIA_SERVER_OPTIONS = {'arg1': 1, ...}  # (optional) kwargs to init server
