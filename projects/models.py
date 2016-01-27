@@ -61,6 +61,7 @@ class TargetPlatform(BaseModel):
     return '{0} {1} {2} {3}'.format(text, self.device, self.operating_system, self.browser)
 
 class Project(VersionModel):
+  private = models.BooleanField(default=True)
   url = models.CharField(max_length=2083, null=True, blank=True)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
   target_platforms = models.ManyToManyField(TargetPlatform)
@@ -107,7 +108,9 @@ class Screenshot(BaseModel):
   image_thumb.allow_tags = True
 
   def has_read_permission(self, user):
-    if not user.is_authenticated():
+    if not self.page.project.private:
+      return True
+    elif not user.is_authenticated():
       return False
     elif user.is_superuser:
       return True
