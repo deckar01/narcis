@@ -4,6 +4,7 @@ import uuid
 import os
 
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
 from private_media.storages import PrivateMediaStorage
 
@@ -78,7 +79,8 @@ class Page(BaseModel):
     unique_together = (('name', 'project'),)
 
 def screenshot_upload_to(self, filename):
-  return 'projects/{0}/{1}/{2}/{3}{4}'.format(
+  return '{0}/{1}/{2}/{3}/{4}{5}'.format(
+    settings.PRIVATE_SCREENSHOT_URL.lstrip('/'),
     self.page.project.id,
     self.target_platform.id,
     self.page.id,
@@ -95,3 +97,21 @@ class Screenshot(BaseModel):
   def extension(self):
     name, extension = os.path.splitext(self.image.name)
     return extension
+
+  def get_url(self):
+    return os.path.join(settings.PRIVATE_SCREENSHOT_URL, str(self.id))
+
+  def image_thumb(self):
+    return '<img src="{0}" height="100" />'.format(self.get_url())
+
+  image_thumb.allow_tags = True
+
+  def has_read_permission(self, user):
+    if not user.is_authenticated():
+      return False
+    elif user.is_superuser:
+      return True
+    elif user.is_staff:
+      return True
+    else:
+      return self.page.project.user.pk == user.pk

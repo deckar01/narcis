@@ -8,11 +8,14 @@ class ProjectAdmin(admin.ModelAdmin):
 class PageAdmin(admin.ModelAdmin):
   list_display = ('__str__', 'project', 'url',)
 
+class ScreenshotAdmin(admin.ModelAdmin):
+  list_display = ('image_thumb', 'page', 'target_platform')
+
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Browser)
 admin.site.register(Device)
 admin.site.register(OperatingSystem)
 admin.site.register(TargetPlatform)
 admin.site.register(Page, PageAdmin)
-admin.site.register(Screenshot)
+admin.site.register(Screenshot, ScreenshotAdmin)
 
