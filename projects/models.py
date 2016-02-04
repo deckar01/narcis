@@ -62,7 +62,7 @@ class TargetPlatform(BaseModel):
     text = super(TargetPlatform, self).__str__()
     return '{0} {1} {2} {3}'.format(text, self.device, self.operating_system, self.browser)
 
-class Project(VersionModel):
+class Project(BaseModel):
   private = models.BooleanField(default=True)
   url = models.CharField(max_length=2083, null=True, blank=True)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -91,7 +91,7 @@ def screenshot_upload_to(self, filename):
     self.extension()
   )
 
-class Screenshot(BaseModel):
+class Screenshot(VersionModel):
   id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
   image = models.ImageField(storage=PrivateMediaStorage(), upload_to=screenshot_upload_to)
   page = models.ForeignKey(Page, on_delete=models.CASCADE)
