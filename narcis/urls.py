@@ -18,5 +18,6 @@ urlpatterns = patterns('',
     url(r'^projects/', include('projects.urls')),
 
     # Access controlled screenshot images
+    url(r'^{0}[0-9]+/[0-9]+/[0-9]+/(?P<id>[0-9a-f\-]+)'.format(settings.PRIVATE_SCREENSHOT_URL.lstrip('/')), screenshot),
     url(r'^{0}(?P<id>[0-9a-f\-]+)'.format(settings.PRIVATE_SCREENSHOT_URL.lstrip('/')), screenshot),
 )
