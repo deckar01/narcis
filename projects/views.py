@@ -1,7 +1,5 @@
 from django.http import HttpResponse
 from django.conf import settings
-from django.http import Http404
-from django.core.exceptions import ObjectDoesNotExist
 from .models import Screenshot
 
 # Load configured private media server
@@ -20,6 +18,6 @@ def screenshot(request, id):
         if screenshot.has_read_permission(request.user):
             return server.serve(request, path=screenshot.image.url.lstrip('/'))
         else:
-            raise ObjectDoesNotExist
+            return HttpResponse('Screenshot not yours', status=403)
     except (ObjectDoesNotExist, ValueError):
-        raise Http404('File not found')
+        return HttpResponse('Screenshot not found: ({0})'.format(id), status=404)
