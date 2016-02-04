@@ -7,9 +7,11 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from private_media.storages import PrivateMediaStorage
+from autoslug import AutoSlugField
 
 class BaseModel(models.Model):
   name = models.CharField(max_length=200)
+  name_slug = AutoSlugField(populate_from='name')
   created_date = models.DateTimeField(auto_now_add=True)
   updated_date = models.DateTimeField(auto_now=True, null=True)
 
@@ -67,7 +69,7 @@ class Project(VersionModel):
   target_platforms = models.ManyToManyField(TargetPlatform)
 
   class Meta:
-    unique_together = (('name', 'user'),)
+    unique_together = (('name_slug', 'user'),)
 
 class Page(BaseModel):
   path = models.CharField(max_length=2083, null=True, blank=True)
@@ -77,7 +79,7 @@ class Page(BaseModel):
     return self.project.url + self.path
 
   class Meta:
-    unique_together = (('name', 'project'),)
+    unique_together = (('name_slug', 'project'),)
 
 def screenshot_upload_to(self, filename):
   return '{0}/{1}/{2}/{3}/{4}{5}'.format(
