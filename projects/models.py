@@ -64,7 +64,7 @@ class TargetPlatform(BaseModel):
 
 class Project(BaseModel):
   private = models.BooleanField(default=True)
-  url = models.CharField(max_length=2083, null=True, blank=True)
+  url = models.CharField(max_length=2083, default='', blank=True)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
   target_platforms = models.ManyToManyField(TargetPlatform)
 
@@ -72,7 +72,7 @@ class Project(BaseModel):
     unique_together = (('name_slug', 'user'),)
 
 class Page(BaseModel):
-  path = models.CharField(max_length=2083, null=True, blank=True)
+  path = models.CharField(max_length=2083, default='', blank=True)
   project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
   def url(self):
