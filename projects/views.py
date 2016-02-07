@@ -1,6 +1,8 @@
 import json
 
 from django.http import HttpResponse
+from django.template.loader import get_template
+from django.template import Context
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate
@@ -26,6 +28,35 @@ def screenshot(request, id):
         screenshot = Screenshot.objects.get(id=id)
         if screenshot.has_read_permission(request.user):
             return server.serve(request, path=screenshot.image.url.lstrip('/'))
+        else:
+            return HttpResponse('Screenshot not yours', status=403)
+    except (ObjectDoesNotExist, ValueError):
+        return HttpResponse('Screenshot not found: ({0})'.format(id), status=404)
+
+def diff(request, before_id, after_id):
+    before = getScreenshot(request, before_id)
+    if type(before) is HttpResponse:
+        return before
+
+    after = getScreenshot(request, after_id)
+    if type(after) is HttpResponse:
+        return after
+
+    template = get_template('diff.html')
+    context = Context({
+        'before': before,
+        'after': after
+    })
+
+    html = template.render(context)
+    return HttpResponse(html)
+
+
+def getScreenshot(request, id):
+    try:
+        screenshot = Screenshot.objects.get(id=id)
+        if screenshot.has_read_permission(request.user):
+            return screenshot
         else:
             return HttpResponse('Screenshot not yours', status=403)
     except (ObjectDoesNotExist, ValueError):
