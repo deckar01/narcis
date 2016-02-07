@@ -11,4 +11,4 @@ A tool for monitoring the visual changes to a web app.
  - [django-private-media](https://pypi.python.org/pypi/django-private-media) ([Install from git repo](https://github.com/RacingTadpole/django-private-media/issues/9))
  - [django-autoslug](https://pypi.python.org/pypi/django-autoslug)
 
-![narcis-icon](https://cloud.githubusercontent.com/assets/3108007/12534299/7ddce590-c217-11e5-8ea1-f1489515f0e4.png)
+![narc-icon](https://cloud.githubusercontent.com/assets/3108007/12870500/752bd720-cd0d-11e5-988c-30d0ec386402.png)
