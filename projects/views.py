@@ -49,7 +49,8 @@ def upload(request, username, project):
 
         project = Project.objects.get(name_slug=project, user_id=project_user.id)
 
-        platform = getPlatform(data['platform']['device'], data['platform']['os'], data['platform']['browser'], project.id)
+        device = data['platform'].get('device', '')
+        platform = getPlatform(device, data['platform']['os'], data['platform']['browser'], project.id)
 
         branch = getBranch(data['branch'], project.id)
         build = getBuild(data['build'], branch.id)
@@ -106,6 +107,9 @@ def getPlatform(device, os, browser, project_id):
     return platform
 
 def getDevice(name):
+    if not name:
+        return None
+
     try:
         device = Device.objects.get(name_slug=slugify(name))
     except (ObjectDoesNotExist, ValueError):

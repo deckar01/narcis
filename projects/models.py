@@ -39,7 +39,7 @@ class Device(BaseModel):
   pass
 
 class Platform(BaseModel):
-  device = models.ForeignKey(Device)
+  device = models.ForeignKey(Device, null=True, blank=True)
   os = models.ForeignKey(OperatingSystem)
   browser = models.ForeignKey(Browser)
   project = models.ForeignKey(Project, on_delete=models.CASCADE)
