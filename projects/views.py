@@ -49,29 +49,82 @@ def upload(request, username, project):
 
         project = Project.objects.get(name_slug=project, user_id=project_user.id)
 
-        try:
-            target_platform = TargetPlatform.objects.get(name_slug=slugify(data['targetPlatform']))
-        except (ObjectDoesNotExist, ValueError):
-            # TODO: Create new platforms
-            return HttpResponse('Target Platform not found: ({0})'.format(data['targetPlatform']), status=404)
+        platform = getPlatform(data['platform']['device'], data['platform']['os'], data['platform']['browser'], project.id)
+
+        branch = getBranch(data['branch'], project.id)
+        build = getBuild(data['build'], branch.id)
 
         for page_name, screenshot_data in data['screenshots'].iteritems():
-            saveScreenshot(project.id, target_platform.id, data['version'], page_name, screenshot_data)
+            saveScreenshot(project.id, build.id, platform.id, page_name, screenshot_data)
 
         return HttpResponse('{"status": "success"}');
 
     except (ObjectDoesNotExist, ValueError):
         return HttpResponse('Project not found', status=404)
 
-def saveScreenshot(project_id, target_platform_id, version, page_name, screenshot_data):
-    try:
-        page = Page.objects.get(name_slug=slugify(page_name), project_id=project_id)
-    except (ObjectDoesNotExist, ValueError):
-        page = Page(name=page_name, project_id=project_id)
-        page.save()
+def saveScreenshot(project_id, build_id, platform_id, page_name, screenshot_data):
+    page = getPage(page_name, project_id)
 
     # TODO: Detect image type
     image_data = b64decode(screenshot_data)
     image = ContentFile(image_data, 'temp.png')
-    screenshot = Screenshot(target_platform_id=target_platform_id, page_id=page.id, version=version, name=page.name, image=image)
+    screenshot = Screenshot(platform_id=platform_id, build_id=build_id, page_id=page.id, name=page.name, image=image)
     screenshot.save()
+
+def getPage(name, project_id):
+    try:
+        page = Page.objects.get(name_slug=slugify(name), project_id=project_id)
+    except (ObjectDoesNotExist, ValueError):
+        page = Page(name=name, project_id=project_id)
+        page.save()
+    return page
+
+def getBranch(name, project_id):
+    try:
+        branch = Branch.objects.get(name_slug=slugify(name), project_id=project_id)
+    except (ObjectDoesNotExist, ValueError):
+        branch = Branch(name=name, project_id=project_id)
+        branch.save()
+    return branch
+
+def getBuild(name, branch_id):
+    try:
+        build = Build.objects.get(name_slug=slugify(name), branch_id=branch_id)
+    except (ObjectDoesNotExist, ValueError):
+        build = Build(name=name, branch_id=branch_id)
+        build.save()
+    return build
+
+def getPlatform(device, os, browser, project_id):
+    platform_name = "{0} {1} {2}".format(device, os, browser)
+
+    try:
+        platform = Platform.objects.get(name_slug=slugify(platform_name), project_id=project_id)
+    except (ObjectDoesNotExist, ValueError):
+        platform = Platform(name=platform_name, device=getDevice(device), os=getOperatingSystem(os), browser=getBrowser(browser), project_id=project_id)
+        platform.save()
+    return platform
+
+def getDevice(name):
+    try:
+        device = Device.objects.get(name_slug=slugify(name))
+    except (ObjectDoesNotExist, ValueError):
+        device = Device(name=name)
+        device.save()
+    return device
+
+def getOperatingSystem(name):
+    try:
+        os = OperatingSystem.objects.get(name_slug=slugify(name))
+    except (ObjectDoesNotExist, ValueError):
+        os = OperatingSystem(name=name)
+        os.save()
+    return os
+
+def getBrowser(name):
+    try:
+        browser = Browser.objects.get(name_slug=slugify(name))
+    except (ObjectDoesNotExist, ValueError):
+        browser = Browser(name=name)
+        browser.save()
+    return browser

@@ -16,7 +16,6 @@ urlpatterns = [
     url(r'^projects/', include('projects.urls')),
 
     # Access controlled screenshot images
-    url(r'^screenshot/[0-9]+/[0-9]+/[0-9]+/(?P<id>[0-9a-f\-]+)', screenshot),
     url(r'^screenshot/(?P<id>[0-9a-f\-]+)', screenshot),
 
     # Authenticated screenshot uploads
