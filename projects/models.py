@@ -82,8 +82,7 @@ class Page(BaseModel):
     unique_together = (('name_slug', 'project'),)
 
 def screenshot_upload_to(self, filename):
-  return '{0}/{1}/{2}/{3}/{4}{5}'.format(
-    settings.PRIVATE_SCREENSHOT_URL.lstrip('/'),
+  return 'screenshot/{1}/{2}/{3}{4}'.format(
     self.page.project.id,
     self.target_platform.id,
     self.page.id,
@@ -102,7 +101,7 @@ class Screenshot(VersionModel):
     return extension
 
   def get_url(self):
-    return os.path.join(settings.PRIVATE_SCREENSHOT_URL, str(self.id))
+    return os.path.join('/screenshot', str(self.id))
 
   def image_thumb(self):
     return '<img src="{0}" height="100" />'.format(self.get_url())
