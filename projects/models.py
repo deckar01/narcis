@@ -41,17 +41,8 @@ class OperatingSystem(VersionModel):
 class Browser(VersionModel):
   pass
 
-class Device(VersionModel):
-  screen_width = models.IntegerField()
-  screen_height = models.IntegerField()
-
-  def __str__(self):
-    text = super(Device, self).__str__()
-
-    if(not self.version):
-      text += ' ({0} x {1})'.format(str(self.screen_width), str(self.screen_height))
-    
-    return text
+class Device(BaseModel):
+  pass
 
 class TargetPlatform(BaseModel):
   device = models.ForeignKey(Device)
