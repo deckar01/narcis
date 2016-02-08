@@ -1,0 +1,22 @@
+{
+  "name": "narcis",
+  "homepage": "https://github.com/deckar01/narcis",
+  "authors": [
+    "Jared Deckard <jared.deckard@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "static/bower",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "promise-polyfill": "^3.1.0"
+  }
+}

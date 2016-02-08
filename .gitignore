@@ -1,3 +1,5 @@
 narcis/config.py
 *.pyc
 *.sqlite3
+static/bower
+

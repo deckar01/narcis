@@ -3,11 +3,20 @@
   <head>
     <title>Narcis</title>
     <link rel="stylesheet" type="text/css" href="/static/diff.css">
+    <script type="text/javascript" src="/static/bower/promise-polyfill/Promise.js"></script>
+    <script type="text/javascript" src="/static/diff.js"></script>
   </head>
   <body>
     <div class="diff">
-      <img class="screenshot before" src="{{ before.image.url }}" alt="{{ before.page.name }}"/>
-      <img class="screenshot after" src="{{ after.image.url }}" alt="{{ after.page.name }}"/>
+      <img id="before" class="screenshot" src="{{ before.image.url }}" alt="{{ before.page.name }} Before"/>
+      <img id="after" class="screenshot" src="{{ after.image.url }}" alt="{{ after.page.name }} After"/>
     </div>
+
+    <script type="text/javascript">
+      var before = new Screenshot('before');
+      var after = new Screenshot('after');
+
+      before.diff(after);
+    </script>
   </body>
 </html>

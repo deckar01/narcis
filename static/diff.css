@@ -4,12 +4,12 @@
   display: inline;
 }
 
-.diff .before {
+.diff #before {
   float: left;
   border: 1px solid blue;
 }
 
-.diff .after {
+.diff #after {
   float: right;
   border: 1px solid red;
 }
