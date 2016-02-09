@@ -7,16 +7,19 @@
     <script type="text/javascript" src="/static/diff.js"></script>
   </head>
   <body>
-    <div class="diff">
+    <div id="diff">
       <img id="before" class="screenshot" src="{{ before.image.url }}" alt="{{ before.page.name }} Before"/>
       <img id="after" class="screenshot" src="{{ after.image.url }}" alt="{{ after.page.name }} After"/>
     </div>
 
     <script type="text/javascript">
-      var before = new Screenshot('before');
-      var after = new Screenshot('after');
-
-      before.diff(after);
+      window.before = new Screenshot('before');
+      window.after = new Screenshot('after');
     </script>
+
+    <div id="controls">
+      <button onclick="window.before.simpleDiff(window.after);">Simple Diff</button>
+      <button onclick="window.before.reset(); window.after.reset();">Reset</button>
+    </div>
   </body>
 </html>

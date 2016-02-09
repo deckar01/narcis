@@ -23,7 +23,21 @@ Screenshot.prototype._load = function() {
   this.imageData = this.context.getImageData(0, 0, this.width, this.height);
 }
 
-Screenshot.prototype.diff = function(other) {
+Screenshot.prototype.renderDiff = function() {
+  if(this.diffData) {
+    this.context.putImageData(this.diffData, 0, 0);
+    this.image.src = this.canvas.toDataURL();
+  }
+}
+
+Screenshot.prototype.reset = function() {
+  if(this.imageData) {
+    this.context.putImageData(this.imageData, 0, 0);
+    this.image.src = this.canvas.toDataURL();
+  }
+}
+
+Screenshot.prototype.simpleDiff = function(other) {
   return Promise.all([this.loaded, other.loaded])
   .then(function() {
 
@@ -46,6 +60,9 @@ Screenshot.prototype.diff = function(other) {
 
     var differentPixels = 0;
 
+    this.diffData = this.context.createImageData(this.imageData);
+    other.diffData = other.context.createImageData(other.imageData);
+
     for(var y = 0; y < height; y++) {
       for(var x = 0; x < width; x++) {
         var thisIndex = 4*(this.width*y + x);
@@ -57,13 +74,18 @@ Screenshot.prototype.diff = function(other) {
 
         if(rDiff !== 0 || gDiff !== 0 || bDiff !== 0) {
           differentPixels++;
-        } else {
-          this.imageData.data[thisIndex] = 0;
-          this.imageData.data[thisIndex+1] = 0;
-          this.imageData.data[thisIndex+2] = 255;
-          other.imageData.data[otherIndex] = 255;
-          other.imageData.data[otherIndex+1] = 0;
-          other.imageData.data[otherIndex+2] = 0;
+
+          var distance = Math.min(255, Math.abs(rDiff) + Math.abs(gDiff) + Math.abs(bDiff));
+
+          this.diffData.data[thisIndex] = this.imageData.data[thisIndex];
+          this.diffData.data[thisIndex+1] = this.imageData.data[thisIndex+1];
+          this.diffData.data[thisIndex+2] = this.imageData.data[thisIndex+2];
+          this.diffData.data[thisIndex+3] = distance;
+
+          other.diffData.data[otherIndex] = other.imageData.data[otherIndex];
+          other.diffData.data[otherIndex+1] = other.imageData.data[otherIndex+1];
+          other.diffData.data[otherIndex+2] = other.imageData.data[otherIndex+2];
+          other.diffData.data[otherIndex+3] = distance;
         }
       }
     }
@@ -71,10 +93,8 @@ Screenshot.prototype.diff = function(other) {
     if(differentPixels > 0) {
       different = true;
 
-      this.context.putImageData(this.imageData, 0, 0);
-      this.image.src = this.canvas.toDataURL();
-      other.context.putImageData(other.imageData, 0, 0);
-      other.image.src = other.canvas.toDataURL();
+      this.renderDiff();
+      other.renderDiff();
 
       var area = width * height;
       var differentPercent = 100 * differentPixels / area;

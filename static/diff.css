@@ -1,15 +1,30 @@
-.diff .screenshot {
+body {
+  margin: 0;
+}
+
+#diff::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+#diff .screenshot {
   box-sizing: border-box;
   width: 50%;
   display: inline;
 }
 
-.diff #before {
+#diff #before {
   float: left;
   border: 1px solid blue;
 }
 
-.diff #after {
+#diff #after {
   float: right;
   border: 1px solid red;
+}
+
+#controls {
+  text-align: center;
+  margin-top: 20px;
 }
