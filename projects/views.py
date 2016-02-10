@@ -51,6 +51,40 @@ def diff(request, before_id, after_id):
     html = template.render(context)
     return HttpResponse(html)
 
+# TODO: Add the platform to the url
+def diffPage(request, username, project, branch, page, build, new_build):
+    try:
+        project_user = User.objects.get(username=username)
+        if not project_user.is_active:
+            raise ObjectDoesNotExist
+
+        project = Project.objects.get(name_slug=project, user_id=project_user.id)
+    except (ObjectDoesNotExist, ValueError):
+        return HttpResponse('Project not found: ({0})'.format(project), status=404)
+
+    try:
+        branch = Branch.objects.get(name_slug=branch, project_id=project.id)
+    except (ObjectDoesNotExist, ValueError):
+        return HttpResponse('Branch not found: ({0})'.format(branch), status=404)
+
+    try:
+        page = Page.objects.get(name_slug=page, project_id=project.id)
+    except (ObjectDoesNotExist, ValueError):
+        return HttpResponse('Page not found: ({0})'.format(page), status=404)
+
+    try:
+        build_before = Build.objects.get(name_slug=build, branch_id=branch.id)
+        before = Screenshot.objects.get(page_id=page.id, build_id=build_before)
+    except (ObjectDoesNotExist, ValueError):
+        return HttpResponse('Build not found: ({0})'.format(build), status=404)
+
+    try:
+        build_after = Build.objects.get(name_slug=new_build, branch_id=branch.id)
+        after = Screenshot.objects.get(page_id=page.id, build_id=build_after)
+    except (ObjectDoesNotExist, ValueError):
+        return HttpResponse('Build not found: ({0})'.format(new_build), status=404)
+
+    return diff(request, before.id, after.id)
 
 def getScreenshot(request, id):
     try:
