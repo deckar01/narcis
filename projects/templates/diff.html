@@ -4,7 +4,9 @@
     <title>Narcis</title>
     <link rel="stylesheet" type="text/css" href="/static/diff.css">
     <script type="text/javascript" src="/static/bower/promise-polyfill/Promise.js"></script>
-    <script type="text/javascript" src="/static/diff.js"></script>
+    <script type="text/javascript" src="/static/Diff.js"></script>
+    <script type="text/javascript" src="/static/ImageData.js"></script>
+    <script type="text/javascript" src="/static/Screenshot.js"></script>
   </head>
   <body>
     <div id="diff">
@@ -18,7 +20,7 @@
     </script>
 
     <div id="controls">
-      <button onclick="window.before.simpleDiff(window.after);">Simple Diff</button>
+      <button onclick="window.before.binaryDiff(window.after);">Binary Diff</button>
       <button onclick="window.before.horizontalDiff(window.after);">Horizontal Diff</button>
       <button onclick="window.before.reset(); window.after.reset();">Reset</button>
     </div>
