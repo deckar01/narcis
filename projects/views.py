@@ -22,6 +22,10 @@ server = ServerClass(**getattr(settings, 'PRIVATE_MEDIA_SERVER_OPTIONS', {}))
 def index(request):
     return HttpResponse("Hello, world. You're at the projects index.")
 
+# Create your views here.
+def tease(request):
+    return HttpResponse(get_template('tease.html').render())
+
 # Request a screenshot image by id
 def screenshot(request, id):
     try:

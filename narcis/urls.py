@@ -6,11 +6,11 @@ from django.contrib import admin
 admin.autodiscover()
 
 from . import views
-from projects.views import screenshot, upload, diff, diffPage
+from projects.views import screenshot, upload, diff, diffPage, tease
 
 urlpatterns = [
 
-    url(r'^$', views.home),
+    url(r'^$', tease),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico')),
     url(r'^projects/', include('projects.urls')),
