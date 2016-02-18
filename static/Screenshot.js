@@ -3,7 +3,7 @@ var Screenshot = function(imageId) {
   this.image = document.getElementById(imageId);
 
   this.loaded = new Promise(function(resolve, reject) {
-    if(!this.image.complete && typeof this.image.naturalWidth !== "undefined" && this.image.naturalWidth === 0) {
+    if(!this.image.complete || typeof this.image.naturalWidth !== "undefined" || this.image.naturalWidth === 0) {
       this.image.onload = resolve;
     } else {
       resolve();
