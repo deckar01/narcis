@@ -36,22 +36,8 @@ Screenshot.prototype.binaryDiff = function(other) {
   .then(function() {
 
     // Diff the image pixels.
-    var pixels = this._diffPixels(other);
-
-    // Highlight the differences.
-    this._highlightBoxes(pixels, 'rgba(0, 0, 255, 0.5)', 'rgba(0, 0, 255, 1)', 2);
-    other._highlightBoxes(pixels, 'rgba(255, 0, 0, 0.5)', 'rgba(255, 0, 0, 1)', 2);
-
-    if(pixels.length > 0) {
-      var width = Math.min(this.width, other.width);
-      var height = Math.min(this.height, other.height);
-
-      var area = width * height;
-      var differentPercent = 100 * pixels.length / area;
-      console.log(differentPercent.toFixed(2) + '% different.');
-    } else {
-      console.log("No difference.");
-    }
+    var pixels = this.imageData32.binaryDiff(other.imageData32);
+    this._highlightDiff(other, pixels, 2);
 
   }.bind(this));
 }
@@ -60,88 +46,41 @@ Screenshot.prototype.horizontalDiff = function(other) {
   return Promise.all([this.loaded, other.loaded])
   .then(function() {
 
-    // Diff the image rows, cluster them together, and simplify them as boxes.
-    var diffRows = this._diffRows(other);
-    var rowClusters = Diff.clusterRows(diffRows, 2);
-    var boxes = Diff.boxClusters(rowClusters);
-
-    // Highlight the differences.
-    this._highlightBoxes(boxes, 'rgba(0, 0, 255, 0.5)', 'rgba(0, 0, 255, 1)', 4);
-    other._highlightBoxes(boxes, 'rgba(255, 0, 0, 0.5)', 'rgba(255, 0, 0, 1)', 4);
-
-    if(boxes.length > 0) {
-      console.log(boxes.length + ' regions are different.');
-      console.log(boxes);
-    } else {
-      console.log("No difference.");
-    }
+    // Diff the image rows.
+    var rows = this.imageData32.horizontalDiff(other.imageData32);
+    this._highlightDiff(other, rows, 4);
 
   }.bind(this));
 }
 
-Screenshot.prototype._getPixel = function(x, y) {
-  return this.imageData32.getPixel(x, y);
+Screenshot.prototype.splitDiff = function(other) {
+  return Promise.all([this.loaded, other.loaded])
+  .then(function() {
+
+    // Diff them image regions.
+    var regions = this.imageData32.splitDiff(other.imageData32);
+    this._highlightDiff(other, regions, 4);
+
+  }.bind(this));
 }
 
-Screenshot.prototype._diffPixels = function(other) {
-  var pixels = [];
+Screenshot.prototype.recursiveDiff = function(other) {
+  return Promise.all([this.loaded, other.loaded])
+  .then(function() {
 
-  var width = Math.min(this.width, other.width);
-  var height = Math.min(this.height, other.height);
+    // Diff them image regions.
+    var regions = this.imageData32.recursiveDiff(other.imageData32);
+    this._highlightDiff(other, regions, 4);
 
-  // Diff each pixel.
-  for(var y = 0; y < height; y++) {
-    for(var x = 0; x < width; x++) {
-      var thisPixel = this._getPixel(x, y);
-      var otherPixel = other._getPixel(x, y);
-
-      // Collect a list of pixels that are different.
-      if(thisPixel !== otherPixel) {
-        pixels.push(new Diff.Box(x, y, x, y));
-      }
-    }
-  }
-
-  return pixels;
+  }.bind(this));
 }
 
-Screenshot.prototype._diffRows = function(other) {
-  var width = Math.min(this.width, other.width);
-  var height = Math.min(this.height, other.height);
-
-  var diffRows = [];
-
-  // Diff each row.
-  for(var y = 0; y < height; y++) {
-    var left = width;
-    var right = width;
-
-    // Find the leftmost pixel that is different.
-    for(var x = 0; x < width; x++) {
-      if(this._getPixel(x, y) !== other._getPixel(x, y)) {
-        left = x;
-        break;
-      }
-    }
-
-    // Find the rightmost pixel that is different.
-    for(var x = width - 1; x > left; x--) {
-      if(this._getPixel(x, y) !== other._getPixel(x, y)) {
-        right = x;
-        break;
-      }
-    }
-
-    // Collect a list of rows that are different.
-    if(left < width) {
-      diffRows.push(new Diff.Row(y, left, right));
-    }
-  }
-
-  return diffRows;
+Screenshot.prototype._highlightDiff = function(other, regions, padding) {
+  this._highlight(regions, 'rgba(0, 0, 255, 0.5)', 'rgba(0, 0, 255, 1)', padding);
+  other._highlight(regions, 'rgba(255, 0, 0, 0.5)', 'rgba(255, 0, 0, 1)', padding);
 }
 
-Screenshot.prototype._highlightBoxes = function(boxes, fillStyle, strokeStyle, padding) {
+Screenshot.prototype._highlight = function(regions, fillStyle, strokeStyle, padding) {
   padding = padding || 0;
 
   var overlay = document.createElement('canvas');
@@ -158,7 +97,7 @@ Screenshot.prototype._highlightBoxes = function(boxes, fillStyle, strokeStyle, p
   context.beginPath();
 
   // Outline regions of the overlay that are different.
-  boxes.forEach(function(box) {
+  regions.forEach(function(box) {
     context.rect(
       box.left - padding,
       box.top  - padding,
@@ -171,7 +110,7 @@ Screenshot.prototype._highlightBoxes = function(boxes, fillStyle, strokeStyle, p
   context.stroke();
   
   // Erase regions of the overlay that are different.
-  boxes.forEach(function(box) {
+  regions.forEach(function(box) {
     context.clearRect(
       box.left - padding,
       box.top  - padding,
@@ -180,10 +119,14 @@ Screenshot.prototype._highlightBoxes = function(boxes, fillStyle, strokeStyle, p
     );
   });
 
-  if(boxes.length > 0) {
-    // Render the overlay.
+  if(regions.length > 0) {
+    // Reset the canvas.
     this.context.putImageData(this.imageData, 0, 0);
+
+    // Render the overlay.
     this.context.drawImage(overlay, 0, 0);
+
+    // Copy the canvas to the image.
     this.image.src = this.canvas.toDataURL();
   }
 }
