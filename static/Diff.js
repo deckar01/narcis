@@ -91,6 +91,14 @@ Diff.Box = function(left, top, right, bottom) {
   this.bottom = bottom;
 }
 
+Diff.Box.prototype.width = function() {
+  return this.right - this.left + 1;
+}
+
+Diff.Box.prototype.height = function() {
+  return this.bottom - this.top + 1;
+}
+
 Diff.Box.prototype.toArray = function() {
   return [
     this.left,
@@ -115,4 +123,12 @@ Diff.boxClusters = function(clusters) {
   });
 
   return boxes;
+}
+
+Diff.Constant = function(c) {
+  return function() { return c; };
+}
+
+Diff.Ratio = function(r) {
+  return function(value) { return r * value; };
 }

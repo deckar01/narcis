@@ -24,6 +24,17 @@ var Screenshot = function(imageId) {
   }.bind(this));
 }
 
+Screenshot.prototype.setClusterSize = function(clusterSize) {
+  return this.loaded.then(function() {
+    this.imageData32.setClusterSize(clusterSize);
+  }.bind(this));
+}
+
+Screenshot.prototype._paddingSize = function() {
+  return this.imageData32.clusterSize();
+}
+
+
 Screenshot.prototype.reset = function() {
   return this.loaded.then(function() {
     this.context.putImageData(this.imageData, 0, 0);
@@ -37,7 +48,7 @@ Screenshot.prototype.binaryDiff = function(other) {
 
     // Diff the image pixels.
     var pixels = this.imageData32.binaryDiff(other.imageData32);
-    this._highlightDiff(other, pixels, 2);
+    this._highlightDiff(other, pixels, this._paddingSize());
 
   }.bind(this));
 }
@@ -48,7 +59,7 @@ Screenshot.prototype.horizontalDiff = function(other) {
 
     // Diff the image rows.
     var rows = this.imageData32.horizontalDiff(other.imageData32);
-    this._highlightDiff(other, rows, 4);
+    this._highlightDiff(other, rows, this._paddingSize());
 
   }.bind(this));
 }
@@ -59,7 +70,7 @@ Screenshot.prototype.splitDiff = function(other) {
 
     // Diff them image regions.
     var regions = this.imageData32.splitDiff(other.imageData32);
-    this._highlightDiff(other, regions, 4);
+    this._highlightDiff(other, regions, this._paddingSize());
 
   }.bind(this));
 }
@@ -70,7 +81,7 @@ Screenshot.prototype.recursiveDiff = function(other) {
 
     // Diff them image regions.
     var regions = this.imageData32.recursiveDiff(other.imageData32);
-    this._highlightDiff(other, regions, 4);
+    this._highlightDiff(other, regions, this._paddingSize());
 
   }.bind(this));
 }

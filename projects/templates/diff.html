@@ -20,11 +20,66 @@
     </script>
 
     <div id="controls">
-      <button onclick="window.before.binaryDiff(window.after);">Binary Diff</button>
-      <button onclick="window.before.horizontalDiff(window.after);">Horizontal Diff</button>
-      <button onclick="window.before.splitDiff(window.after);">Split Diff</button>
-      <button onclick="window.before.recursiveDiff(window.after);">Recursive Diff</button>
-      <button onclick="window.before.reset(); window.after.reset();">Reset</button>
+
+      <p>
+        <button class="diff" id="binaryDiff">Binary Diff</button>
+        <button class="diff" id="horizontalDiff">Horizontal Diff</button>
+        <button class="diff" id="splitDiff">Split Diff</button>
+        <button class="diff" id="recursiveDiff">Recursive Diff</button>
+        <button id="reset">Reset</button>
+      </p>
+
+      <form id="advanced">
+
+        <p>
+          <label for="clusterSize" class="description">Cluster Size: </label>
+          <input
+            type="number"
+            id="clusterSize"
+            name="clusterSize"
+            title="The cluster size must be a non-negative integer."
+            pattern="\d+"
+            value="4"
+            min="0"
+            step="1"
+          >
+          <label for="clusterSize" class="unit"> (pixels)</label>
+        </p>
+
+        <script>
+          var currentDiffId = null;
+
+          var diffButtons = Array.prototype.slice.apply(document.querySelectorAll('#controls .diff'));
+          diffButtons.forEach(function(diffButton) {
+            var diffId = diffButton.id;
+            diffButton.onclick = function() {
+              currentDiffId = diffId;
+              window.before[diffId](window.after);
+            }
+          });
+
+          document.getElementById('reset').onclick = function() {
+            window.before.reset();
+            window.after.reset();
+          }
+
+          var clusterSize = document.getElementById('clusterSize');
+          clusterSize.onchange = function(e) {
+            if(this.checkValidity()) {
+              window.before.setClusterSize(Diff.Constant(this.value));
+              window.after.setClusterSize(Diff.Constant(this.value));
+
+              if(currentDiffId) {
+                window.before[currentDiffId](window.after);
+              }
+            }
+          }
+
+          clusterSize.onchange();
+        </script>
+
+      </form>
+
     </div>
   </body>
 </html>

@@ -2,6 +2,7 @@ var ImageData32 = function(imageData8) {
   this.data = new Uint32Array(imageData8.data.buffer);
   this.width = imageData8.width;
   this.height = imageData8.height;
+  this.clusterSize = Diff.Constant(0);
 };
 
 ImageData32.prototype.index = function(x, y) {
@@ -36,6 +37,10 @@ ImageData32.prototype.sliceRow = function(y, xBegin, xEnd) {
   );
 };
 
+ImageData32.prototype.setClusterSize = function(clusterSize) {
+  this.clusterSize = clusterSize;
+};
+
 ImageData32.prototype.binaryDiff = function(other) {
   var pixels = [];
 
@@ -59,12 +64,14 @@ ImageData32.prototype.binaryDiff = function(other) {
 }
 
 ImageData32.prototype.horizontalDiff = function(other, boundary) {
+  boundary = boundary || this.commonBoundary(other);
 
   // Diff the image rows.
   var diffRows = this.diffRows(other, boundary);
 
   // Cluster the rows together.
-  var rowClusters = Diff.clusterRows(diffRows, 2);
+  var maxHeight = this.clusterSize(boundary.height());
+  var rowClusters = Diff.clusterRows(diffRows, maxHeight);
 
   // Simplify the clusters as boxes.
   var boxes = Diff.boxClusters(rowClusters);
@@ -78,15 +85,11 @@ ImageData32.prototype.splitDiff = function(other, boundary) {
 
   return rowBoxes.reduce(function(boxes, rowBox) {
 
-    // Cluster columns closer than GR% of the box width.
-    var GAP_RATIO = 0.1;
-    var width = rowBox.right - rowBox.left + 1;
-    var maxWidth = GAP_RATIO * width;
-
     // Diff the image columns.
     var diffColumns = this.diffColumns(other, rowBox);
 
     // Cluster the columns together.
+    var maxWidth = this.clusterSize(rowBox.width());
     var columnClusters = Diff.clusterColumns(diffColumns, maxWidth);
 
     // Simplify the clusters as boxes.
@@ -104,7 +107,7 @@ ImageData32.prototype.recursiveDiff = function(other, boundary) {
   // Stop if the boundary could not be split.
   if(boxes.length <= 1) { return boxes; }
 
-  // Recusrively split boxes into smaller boxes.
+  // Recursively split boxes into smaller boxes.
   return boxes.reduce(function(innerBoxes, box) {
     return innerBoxes.concat(this.recursiveDiff(other, box));
   }.bind(this), []);
@@ -120,8 +123,6 @@ ImageData32.prototype.commonBoundary = function(other) {
 }
 
 ImageData32.prototype.diffRows = function(other, boundary) {
-
-  boundary = boundary || this.commonBoundary(other);
 
   var diffRows = [];
 
