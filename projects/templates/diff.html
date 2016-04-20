@@ -26,6 +26,7 @@
         <button class="diff" id="horizontalDiff">Horizontal Diff</button>
         <button class="diff" id="splitDiff">Split Diff</button>
         <button class="diff" id="recursiveDiff">Recursive Diff</button>
+        <button class="diff" id="moveDiff">Move Diff</button>
         <button id="reset">Reset</button>
       </p>
 
@@ -66,8 +67,8 @@
           var clusterSize = document.getElementById('clusterSize');
           clusterSize.onchange = function(e) {
             if(this.checkValidity()) {
-              window.before.setClusterSize(Diff.Constant(this.value));
-              window.after.setClusterSize(Diff.Constant(this.value));
+              window.before.setClusterSize(Diff.Constant(Number(this.value)));
+              window.after.setClusterSize(Diff.Constant(Number(this.value)));
 
               if(currentDiffId) {
                 window.before[currentDiffId](window.after);

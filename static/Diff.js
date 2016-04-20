@@ -47,7 +47,7 @@ Diff.clusterRows = function(rows, maxDistance) {
     var previousY = (i>0) ? rows[i-1].bottom : -1;
     var distance = row.top - previousY - 1;
 
-    if(distance <= maxDistance) {
+    if(distance <= 2*maxDistance) {
       cluster.add(row);
     } else {
       if(!cluster.isEmpty()) clusters.push(cluster);
@@ -71,7 +71,7 @@ Diff.clusterColumns = function(columns, maxDistance) {
     var previousX = (i>0) ? columns[i-1].right : -1;
     var distance = column.left - previousX - 1;
 
-    if(distance <= maxDistance) {
+    if(distance <= 2*maxDistance) {
       cluster.add(column);
     } else {
       if(!cluster.isEmpty()) clusters.push(cluster);
@@ -97,6 +97,13 @@ Diff.Box.prototype.width = function() {
 
 Diff.Box.prototype.height = function() {
   return this.bottom - this.top + 1;
+}
+
+Diff.Box.prototype.center = function() {
+  return {
+    x: (this.left + this.right)/2,
+    y: (this.top + this.bottom)/2
+  };
 }
 
 Diff.Box.prototype.toArray = function() {

@@ -113,6 +113,45 @@ ImageData32.prototype.recursiveDiff = function(other, boundary) {
   }.bind(this), []);
 }
 
+ImageData32.prototype.moveDiff = function(other) {
+
+  // Recursively diff the image boxes.
+  var boxes = this.recursiveDiff(other);
+
+  // Seprate out pairs of exact matches between diff regions.
+  moves = [];
+  for(var i = 0; i < boxes.length; i++) {
+    box1 = boxes[i];
+
+    for(var j = i + 1; j < boxes.length; j++) {
+      var box2 = boxes[j];
+
+      if(!this.compareRegions(other, box1, box2)) continue;
+
+      var move = {};
+
+      // ASSUMTION: The foreground of a webpage has higher entropy than the background.
+      // Consider analyzing just the entropy of the border to measure continuity.
+      if(this.entropy(box1) > other.entropy(box1)) {
+        move = {from: box1, to: box2};
+      } else {
+        move = {from: box2, to: box1};
+      }
+
+      moves.push(move);
+      boxes.splice(j, 1);
+      boxes.splice(i, 1);
+      i--;
+      break;
+    }
+  }
+
+  return {
+    changes: boxes,
+    moves: moves
+  };
+}
+
 ImageData32.prototype.commonBoundary = function(other) {
 
   var width = Math.min(this.width, other.width);
@@ -190,4 +229,42 @@ ImageData32.prototype.diffColumns = function(other, boundary) {
   }
 
   return diffRows;
+}
+
+ImageData32.prototype.compareRegions = function(other, thisBoundary, otherBoundary) {
+
+  if(thisBoundary.width() != otherBoundary.width()) return false;
+  if(thisBoundary.height() != otherBoundary.height()) return false;
+
+  // Diff each row.
+  for(var y1 = thisBoundary.top, y2 = otherBoundary.top; y1 <= thisBoundary.bottom; y1++, y2++) {
+    for(var x1 = thisBoundary.left, x2 = otherBoundary.left; x1 <= thisBoundary.right; x1++, x2++) {
+      if(this.getPixel(x1, y1) != other.getPixel(x2, y2)) return false;
+    }
+  }
+
+  return true;
+}
+
+ImageData32.prototype.entropy = function(boundary) {
+  var entropy = 0;
+  edges = 2 * (boundary.width() - 1) * (boundary.height() - 1);
+
+  for(var y = boundary.top; y < boundary.bottom; y++) {
+    for(var x = boundary.left; x < boundary.right; x++) {
+      pixel = ImageData32.uint32ToRgba(this.getPixel(x, y));
+      beside = ImageData32.uint32ToRgba(this.getPixel(x+1, y));
+      below = ImageData32.uint32ToRgba(this.getPixel(x, y+1));
+      entropy += (
+        Math.abs(pixel[0] - beside[0]) + 
+        Math.abs(pixel[1] - beside[1]) + 
+        Math.abs(pixel[2] - beside[2]) +
+        Math.abs(pixel[0] - below[0]) + 
+        Math.abs(pixel[1] - below[1]) + 
+        Math.abs(pixel[2] - below[2])
+      )/(3*256);
+    }
+  }
+
+  return entropy/edges;
 }
