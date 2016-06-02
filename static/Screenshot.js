@@ -19,9 +19,18 @@ var Screenshot = function(imageId) {
     this.context.drawImage(this.image, 0, 0);
 
     this.imageData = this.context.getImageData(0, 0, this.width, this.height);
-    this.imageData32 = new ImageData32(this.imageData);
+    this.imageData32 = ImageData32.from8(this.imageData);
 
   }.bind(this));
+}
+
+Screenshot.diffAlgorithms = {
+  binaryDiff: 'Binary Diff',
+  horizontalDiff: 'Horizontal Diff',
+  splitDiff: 'Split Diff',
+  recursiveDiff: 'Recursive Diff',
+  moveDiff: 'Move Diff',
+  decomposeDiff: 'Decompose Diff'
 }
 
 Screenshot.prototype.setClusterSize = function(clusterSize) {
@@ -92,6 +101,17 @@ Screenshot.prototype.moveDiff = function(other) {
 
     // Diff them image regions.
     var diff = this.imageData32.moveDiff(other.imageData32);
+    this._highlightDiff(other, diff, this._paddingSize());
+
+  }.bind(this));
+}
+
+Screenshot.prototype.decomposeDiff = function(other) {
+  return Promise.all([this.loaded, other.loaded])
+  .then(function() {
+
+    // Diff them image regions.
+    var diff = this.imageData32.decomposeDiff(other.imageData32);
     this._highlightDiff(other, diff, this._paddingSize());
 
   }.bind(this));
