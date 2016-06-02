@@ -21,12 +21,7 @@
 
     <div id="controls">
 
-      <p>
-        <button class="diff" id="binaryDiff">Binary Diff</button>
-        <button class="diff" id="horizontalDiff">Horizontal Diff</button>
-        <button class="diff" id="splitDiff">Split Diff</button>
-        <button class="diff" id="recursiveDiff">Recursive Diff</button>
-        <button class="diff" id="moveDiff">Move Diff</button>
+      <p id="diffButtons">
         <button id="reset">Reset</button>
       </p>
 
@@ -48,21 +43,29 @@
         </p>
 
         <script>
-          var currentDiffId = null;
 
-          var diffButtons = Array.prototype.slice.apply(document.querySelectorAll('#controls .diff'));
-          diffButtons.forEach(function(diffButton) {
-            var diffId = diffButton.id;
-            diffButton.onclick = function() {
-              currentDiffId = diffId;
-              window.before[diffId](window.after);
-            }
-          });
-
-          document.getElementById('reset').onclick = function() {
+          var resetButton = document.getElementById('reset');
+          resetButton.onclick = function() {
             window.before.reset();
             window.after.reset();
-          }
+          };
+
+          var diffButtons = document.getElementById('diffButtons');
+
+          var currentDiffId = null;
+
+          Object.keys(Screenshot.diffAlgorithms)
+          .forEach(function(algorithm) {
+            var button = document.createElement('button');
+            button.id = algorithm;
+            button.classList.add('diff');
+            button.innerHTML = Screenshot.diffAlgorithms[algorithm];
+            button.onclick = function() {
+              currentDiffId = algorithm;
+              window.before[algorithm](window.after);
+            }
+            diffButtons.insertBefore(button, resetButton);
+          });
 
           var clusterSize = document.getElementById('clusterSize');
           clusterSize.onchange = function(e) {
