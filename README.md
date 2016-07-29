@@ -1,6 +1,8 @@
 # narcis
 A tool for monitoring the visual changes to a web app.
 
+![narc-icon](https://cloud.githubusercontent.com/assets/3108007/12870500/752bd720-cd0d-11e5-988c-30d0ec386402.png)
+
 **Status:** Planning and Prototyping
 
 ### Dependencies
@@ -13,4 +15,6 @@ A tool for monitoring the visual changes to a web app.
  - [bower](http://bower.io/#install-bower)
  - `bower install`
 
-![narc-icon](https://cloud.githubusercontent.com/assets/3108007/12870500/752bd720-cd0d-11e5-988c-30d0ec386402.png)
+### Examples
+
+![move-diff](https://cloud.githubusercontent.com/assets/3108007/17236762/f8368170-5510-11e6-966f-fdb500b2bda3.png)
